@@ -1,0 +1,10 @@
+type,name,content,ttl,proxied,priority
+MX,@,aspmx.l.google.com,3600,FALSE,1
+MX,@,alt1.aspmx.l.google.com,3600,FALSE,5
+MX,@,alt2.aspmx.l.google.com,3600,FALSE,5
+MX,@,alt3.aspmx.l.google.com,3600,FALSE,10
+MX,@,alt4.aspmx.l.google.com,3600,FALSE,10
+TXT,@,v=spf1 include:_spf.google.com ~all,3600,FALSE,
+CNAME,mail,ghs.google.com,3600,FALSE,
+TXT,_dmarc,v=DMARC1; p=none; rua=mailto:admin@yourdomain.com,3600,FALSE,
+TXT,test,v=DMARC1; p=none; rua=mailto:admin@yourdomain-com,3600,FALSE,
