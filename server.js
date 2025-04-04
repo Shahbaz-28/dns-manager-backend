@@ -13,6 +13,7 @@ const CLOUDFLARE_API_URL = process.env.CLOUDFLARE_API_URL;
 const corsOptions = {
   origin: [
     process.env.FRONTEND_URL || "http://localhost:3000",
+    // process.env.FRONTEND_URL || "https://dnsmanager.vercel.app",
     // Add other allowed origins as needed
   ],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -227,6 +228,39 @@ app.post("/api/fetch-nameservers", async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message,
+    });
+  }
+});
+
+app.post("/api/add-google-verification", async (req, res) => {
+  try {
+    const { apiKey, zoneId, domain, txtValue } = req.body;
+    
+    const record = {
+      type: "TXT",
+      name: domain, // Will become "@" for root domain
+      content: txtValue,
+      ttl: 1, // Auto TTL
+      proxied: false,
+      comment: "Google site verification"
+    };
+
+    const response = await axios.post(
+      `${CLOUDFLARE_API_URL}/zones/${zoneId}/dns_records`,
+      record,
+      { headers: getHeaders(apiKey) }
+    );
+
+    res.json({
+      success: true,
+      message: "Google verification TXT record added successfully",
+      record: response.data.result
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to add verification record",
+      details: error.message
     });
   }
 });
