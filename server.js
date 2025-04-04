@@ -12,13 +12,12 @@ const CLOUDFLARE_API_URL = process.env.CLOUDFLARE_API_URL;
 // Enhanced CORS configuration
 const corsOptions = {
   origin: [
+    "https://www.mailsetup.io", // Add your frontend domain here
     process.env.FRONTEND_URL || "http://localhost:3000",
-    // process.env.FRONTEND_URL || "https://dnsmanager.vercel.app",
-    // Add other allowed origins as needed
   ],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
 };
 
 app.use(express.json());
@@ -235,14 +234,14 @@ app.post("/api/fetch-nameservers", async (req, res) => {
 app.post("/api/add-google-verification", async (req, res) => {
   try {
     const { apiKey, zoneId, domain, txtValue } = req.body;
-    
+
     const record = {
       type: "TXT",
       name: domain, // Will become "@" for root domain
       content: txtValue,
       ttl: 1, // Auto TTL
       proxied: false,
-      comment: "Google site verification"
+      comment: "Google site verification",
     };
 
     const response = await axios.post(
@@ -254,13 +253,13 @@ app.post("/api/add-google-verification", async (req, res) => {
     res.json({
       success: true,
       message: "Google verification TXT record added successfully",
-      record: response.data.result
+      record: response.data.result,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: "Failed to add verification record",
-      details: error.message
+      details: error.message,
     });
   }
 });
