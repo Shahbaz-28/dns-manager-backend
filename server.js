@@ -17,20 +17,25 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// CORS configuration
+// CORS configuration (single frontend URL with optional *.vercel.app preview allowance)
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.FRONTEND_URL_2,
-  process.env.FRONTEND_URL_3,
+  process.env.FRONTEND_URL, // e.g., https://your-project.vercel.app
   "http://localhost:3000",
 ].filter(Boolean);
+const allowVercelPreviews = String(process.env.ALLOW_VERCEL_PREVIEWS || "false").toLowerCase() === "true";
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // allow non-browser or same-origin
-    const isAllowed =
-      allowedOrigins.includes(origin) || /\.vercel\.app$/.test(new URL(origin).hostname);
-    return isAllowed ? callback(null, true) : callback(new Error("Not allowed by CORS"));
+    if (!origin) return callback(null, true); // same-origin/non-browser
+    try {
+      const url = new URL(origin);
+      const isExactAllowed = allowedOrigins.includes(origin);
+      const isVercelPreview = allowVercelPreviews && url.hostname.endsWith(".vercel.app");
+      if (isExactAllowed || isVercelPreview) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    } catch (e) {
+      return callback(new Error("Invalid origin"));
+    }
   },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   credentials: true,
@@ -40,7 +45,6 @@ const corsOptions = {
 
 app.use(express.json());
 app.use(cors(corsOptions));
-// Ensure preflight requests are handled for all routes
 app.options("*", cors(corsOptions));
 
 // Import and use user routes
