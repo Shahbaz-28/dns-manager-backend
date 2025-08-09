@@ -3,11 +3,19 @@ const axios = require("axios");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const CLOUDFLARE_API_URL = process.env.CLOUDFLARE_API_URL;
+const CLOUDFLARE_API_URL = process.env.CLOUDFLARE_API_URL || "https://api.cloudflare.com/client/v4";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/dns-manager";
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+
+// Connect to MongoDB
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Enhanced CORS configuration
 const corsOptions = {
@@ -23,6 +31,10 @@ const corsOptions = {
 
 app.use(express.json());
 app.use(cors(corsOptions));
+
+// Import and use user routes
+const userRoutes = require('./routes/users');
+app.use('/api', userRoutes);
 
 const getHeaders = (apiKey) => ({
   Authorization: `Bearer ${apiKey}`,
